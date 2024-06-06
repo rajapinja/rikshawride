@@ -1,0 +1,7 @@
+{
+    "java.project.sourcePaths": [
+        "src/db",
+        "src"
+    ],
+    "java.compile.nullAnalysis.mode": "disabled"
+}

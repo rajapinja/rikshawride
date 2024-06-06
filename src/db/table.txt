@@ -1,0 +1,286 @@
+CREATE TABLE rikshawride.Users (
+    UserID INT PRIMARY KEY AUTO_INCREMENT,
+    UserType ENUM('AutoOwner', 'Rider') NOT NULL,
+    Name VARCHAR(50) NOT NULL,
+    Email VARCHAR(50) UNIQUE NOT NULL,
+    Phone VARCHAR(15) UNIQUE NOT NULL,
+    Password VARCHAR(100) NOT NULL,
+    RegistrationDate DATE NOT NULL
+);
+
+CREATE TABLE rikshawride.AutoRickshaws (
+    AutoID INT PRIMARY KEY AUTO_INCREMENT,
+    OwnerID INT NOT NULL,
+    VehicleNumber VARCHAR(20) UNIQUE NOT NULL,
+    Model VARCHAR(50) NOT NULL,
+    RegistrationDate DATE NOT NULL,
+    FOREIGN KEY (OwnerID) REFERENCES Users(UserID)
+);
+
+CREATE TABLE rikshawride.Rides (
+    RideID INT PRIMARY KEY AUTO_INCREMENT,
+    RiderID INT NOT NULL,
+    AutoID INT NOT NULL,
+    PickupLocation VARCHAR(100) NOT NULL,
+    Destination VARCHAR(100) NOT NULL,
+    Fare DECIMAL(10, 2) NOT NULL,
+    RideDate DATE NOT NULL,
+    FOREIGN KEY (RiderID) REFERENCES Users(UserID),
+    FOREIGN KEY (AutoID) REFERENCES AutoRickshaws(AutoID)
+);
+
+CREATE TABLE rikshawride.Commission (
+    CommissionID INT PRIMARY KEY AUTO_INCREMENT,
+    RideID INT NOT NULL,
+    Amount DECIMAL(10, 2) NOT NULL,
+    CommissionType ENUM('Percentage', 'Fixed') NOT NULL,
+    CommissionRate DECIMAL(5, 2),  -- if CommissionType is Percentage
+    FOREIGN KEY (RideID) REFERENCES Rides(RideID)
+);
+
+CREATE TABLE rikshawride.Subscription (
+    SubscriptionID INT PRIMARY KEY AUTO_INCREMENT,
+    OwnerID INT NOT NULL,
+    PlanName VARCHAR(50) NOT NULL,
+    Price DECIMAL(10, 2) NOT NULL,
+    ValidityPeriod INT NOT NULL,  -- in months
+    SubscriptionStartDate DATE NOT NULL,
+    SubscriptionEndDate DATE NOT NULL,
+    FOREIGN KEY (OwnerID) REFERENCES Users(UserID)
+);
+
+CREATE TABLE rikshawride.Advertisement (
+    AdID INT PRIMARY KEY AUTO_INCREMENT,
+    AdvertiserID INT NOT NULL,
+    AdTitle VARCHAR(100) NOT NULL,
+    AdDescription TEXT,
+    AdImageURL VARCHAR(255) NOT NULL,
+    AdStartDate DATE NOT NULL,
+    AdEndDate DATE NOT NULL,
+    Cost DECIMAL(10, 2) NOT NULL,
+    FOREIGN KEY (AdvertiserID) REFERENCES Users(UserID)
+);
+
+CREATE TABLE rikshawride.Fare (
+    FareID INT PRIMARY KEY AUTO_INCREMENT,
+    AutoID INT NOT NULL,
+    Route VARCHAR(100) NOT NULL,
+    FareAmount DECIMAL(10, 2) NOT NULL,
+    FareType ENUM('Fixed', 'Variable') NOT NULL,
+    FOREIGN KEY (AutoID) REFERENCES AutoRickshaws(AutoID)
+);
+
+CREATE TABLE rikshawride.Feedback (
+    FeedbackID INT PRIMARY KEY AUTO_INCREMENT,
+    RideID INT NOT NULL,
+    Rating INT NOT NULL,
+    Comment TEXT,
+    FeedbackDate DATE NOT NULL,
+    FOREIGN KEY (RideID) REFERENCES Rides(RideID)
+);
+
+CREATE TABLE rikshawride.GeoTracker (
+    TrackerID INT PRIMARY KEY AUTO_INCREMENT,
+    AutoID INT NOT NULL,
+    Latitude DECIMAL(10, 8) NOT NULL,
+    Longitude DECIMAL(11, 8) NOT NULL,
+    Timestamp DATETIME NOT NULL,
+    FOREIGN KEY (AutoID) REFERENCES AutoRickshaws(AutoID)
+);
+
+CREATE TABLE `rikshawride`.`app_user` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `username` varchar(50) NOT NULL,
+  `password_hash` varchar(100) NOT NULL,
+  `email` varchar(100) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `username` (`username`)
+);
+
+CREATE TABLE `rikshawride`.`roles` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `role` varchar(50) NOT NULL,
+  PRIMARY KEY (`id`)
+) ;
+
+DROP TABLE `rikshawride`.`app_user_roles`;
+CREATE TABLE `rikshawride`.`app_user_roles` (
+  `user_id` int NOT NULL,
+  `role_id` int NOT NULL,
+  PRIMARY KEY (`user_id`,`role_id`),
+  KEY `role_id` (`role_id`),
+  CONSTRAINT `users_roles_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `rikshawride`.`app_user` (`id`),
+  CONSTRAINT `users_roles_ibfk_2` FOREIGN KEY (`role_id`) REFERENCES `rikshawride`.`roles` (`id`)
+);
+
+CREATE TABLE `rikshawride`.`permissions` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `permission` varchar(50) NOT NULL,
+  PRIMARY KEY (`id`)
+) ;
+
+CREATE TABLE `rikshawride`.`role_permissions` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `role_id` int DEFAULT NULL,
+  `permission_id` int DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `role_id` (`role_id`),
+  KEY `permission_id` (`permission_id`),
+  CONSTRAINT `role_permissions_ibfk_1` FOREIGN KEY (`role_id`) REFERENCES `rikshawride`.`roles` (`id`),
+  CONSTRAINT `role_permissions_ibfk_2` FOREIGN KEY (`permission_id`) REFERENCES `rikshawride`.`permissions` (`id`)
+) ;
+
+
+CREATE TABLE rikshawride.vehicle_type (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(50) NOT NULL,
+    description TEXT,
+    image_url VARCHAR(255),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+CREATE TABLE `rikshawride`.`vehicle_type` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `name` ENUM('motorcycle','auto_rikshaw','car', 'truck', 'bus', 'van') NOT NULL,
+  `description` text,
+  `image_url` varchar(255) DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`)
+);
+
+CREATE TABLE `rikshawride`.`vehicletype` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `type_name` VARCHAR(255),
+  PRIMARY KEY (`id`)
+);
+
+CREATE TABLE `rikshawride`.`password_history` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `username` varchar(50) NOT NULL,
+  `password_hash` varchar(100) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `username` (`username`)
+) ;
+
+CREATE TABLE `rikshawride`.`users` (
+  `userid` INT NOT NULL AUTO_INCREMENT,
+  `role` ENUM('User','Admin','Manager','AutoOwner','Rider') NOT NULL,
+  `name` VARCHAR(50) NOT NULL,
+  `email` VARCHAR(50) NOT NULL,
+  `phone` VARCHAR(15) NOT NULL,
+  `password` VARCHAR(100) NOT NULL,
+  `registration_date` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `vehicle_name` ENUM('motorcycle','auto_rikshaw','car','truck','bus','van') DEFAULT NULL,
+  PRIMARY KEY (`userid`),
+  UNIQUE KEY `email` (`email`),
+  UNIQUE KEY `phone` (`phone`)
+);
+
+drop table rikshawride.users;
+
+delete from rikshawride.users;
+
+ALTER TABLE rikshawride.autorickshaws
+DROP FOREIGN KEY autorickshaws_ibfk_1;
+
+ALTER TABLE rikshawride.autorickshaws
+ADD CONSTRAINT fk_autorickshaws_owner_id
+FOREIGN KEY (ownerid) 
+REFERENCES rikshawride.users(userid);
+
+ALTER TABLE rikshawride.rides
+DROP FOREIGN KEY rides_ibfk_1;
+
+ALTER TABLE rikshawride.rides
+ADD CONSTRAINT fk_rider_auto_id
+FOREIGN KEY (autoid) 
+REFERENCES rikshawride.users(userid);
+
+ALTER TABLE rikshawride.subscription
+DROP FOREIGN KEY subscription_ibfk_1;
+
+ALTER TABLE rikshawride.subscription
+ADD CONSTRAINT fk_subscription_owner_id
+FOREIGN KEY (ownerid) 
+REFERENCES rikshawride.users(userid);
+
+ALTER TABLE rikshawride.advertisement
+DROP FOREIGN KEY advertisement_ibfk_1;
+
+ALTER TABLE rikshawride.advertisement
+ADD CONSTRAINT fk_advertisement_advertiser_id
+FOREIGN KEY (AdvertiserID) 
+REFERENCES rikshawride.users(userid);
+
+INSERT INTO rikshawride.roles (role) VALUES
+('rider'),
+('autoowner');
+
+ALTER TABLE rikshawride.app_user_roles
+RENAME TO rikshawride.user_roles;
+
+drop table rikshawride.app_user;
+
+delete from rikshawride.user_roles
+ALTER TABLE rikshawride.user_roles
+DROP FOREIGN KEY users_roles_ibfk_1;
+
+ALTER TABLE rikshawride.user_roles
+ADD CONSTRAINT fk_user_roles_user_id
+FOREIGN KEY (user_id) 
+REFERENCES rikshawride.users(userid);
+
+
+CREATE TABLE rikshawride.usertype (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    type_name VARCHAR(50) NOT NULL UNIQUE
+);
+
+INSERT INTO rikshawride.usertype (type_name) VALUES ('owner');
+INSERT INTO rikshawride.usertype (type_name) VALUES ('rider');
+
+
+ALTER TABLE rikshawride.app_user
+ADD role VARCHAR(255) DEFAULT NULL;
+
+ALTER TABLE rikshawride.users
+ADD COLUMN vehicle_name ENUM('motorcycle', 'auto_rikshaw', 'car', 'truck', 'bus', 'van');
+
+CREATE TABLE `rikshawride`.`password_history` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `user_id` INT NOT NULL,
+  `password_hash` VARCHAR(100) NOT NULL,
+  `change_date` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  FOREIGN KEY (`user_id`) REFERENCES `users` (`userid`)
+);
+
+CREATE TABLE `autorickshaws` (
+  `AutoID` int NOT NULL AUTO_INCREMENT,
+  `OwnerID` int NOT NULL,
+  `VehicleNumber` varchar(20) NOT NULL,
+  `Model` varchar(50) NOT NULL,
+  `RegistrationDate` date NOT NULL,
+  PRIMARY KEY (`AutoID`),
+  UNIQUE KEY `VehicleNumber` (`VehicleNumber`),
+  KEY `fk_autorickshaws_owner_id` (`OwnerID`),
+  CONSTRAINT `fk_autorickshaws_owner_id` FOREIGN KEY (`OwnerID`) REFERENCES `users` (`userid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+SELECT * FROM rikshawride.autorickshaws;
+
+INSERT INTO rikshawride.autorickshaws (OwnerID, VehicleNumber, Model, RegistrationDate)
+VALUES
+    (1, 'ABC123', 'Auto Rikshaw - TVS DELUXE', '2023-01-15'),
+    (1, 'XYZ456', 'Auto Rikshaw Bajaj', '2022-09-20'),
+    (1, 'PQR789', 'TVS AUTO DELUXE ', '2023-03-10');
+
+CREATE TABLE rikshawride.auto_model( id int NOT NULL AUTO_INCREMENT PRIMARY KEY, model varchar(255));
+INSERT INTO rikshawride.auto_model(model) VALUES
+('Bajaj Compact RE'),
+('Mahindra Treo'),
+('Bajaj Maxima Z'),
+('Piaggio Ape City Plus'),
+('Mahindra Alfa'),
+('TVS King Deluxe');

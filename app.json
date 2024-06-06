@@ -1,0 +1,10 @@
+{
+  "expo": {
+    "name": "rickshawride",
+    "slug": "rickshawride",
+    "version": "1.0.0",
+    "assetBundlePatterns": [
+      "**/*"
+    ]
+  }
+}
